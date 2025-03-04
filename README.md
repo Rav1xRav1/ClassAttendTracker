@@ -1,2 +1,2 @@
-# ClassAttendTrack
+# ClassAttendTracker
 iPhoneの探すの位置情報を取得して出席を反転するプログラム
