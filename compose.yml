@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: classattendtracker_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: classattendtrack
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql # 初期セットアップSQL
+      - postgres_data:/var/lib/postgresql/data # データを永続化
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    container_name: classattendtracker_api
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://user:password@db/classattendtrack
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app # 開発用にコードを同期（オプション）
+
+volumes:
+  postgres_data:
