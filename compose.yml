@@ -1,32 +1,39 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:15
-    container_name: classattendtracker_db
+    build: ./db
+    container_name: db
     restart: always
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: classattendtrack
-    volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql # 初期セットアップSQL
-      - postgres_data:/var/lib/postgresql/data # データを永続化
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: class_attendance
+    networks:
+      - app_network
 
-  api:
-    build: .
-    container_name: classattendtracker_api
+  gps_tracker:
+    build: ./src/gps_tracker
+    container_name: gps_tracker
     restart: always
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/class_attendance
     depends_on:
       - db
+    networks:
+      - app_network
+
+  attendance_checker:
+    build: ./src/attendance_checker
+    container_name: attendance_checker
+    restart: always
     environment:
-      DATABASE_URL: postgresql://user:password@db/classattendtrack
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./src:/app # 開発用にコードを同期（オプション）
+      DATABASE_URL: postgresql://user:password@db:5432/class_attendance
+    depends_on:
+      - db
+    networks:
+      - app_network
 
 volumes:
-  postgres_data:
+  pg_data:
+
+networks:
+  app_network:
