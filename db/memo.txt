@@ -1,0 +1,9 @@
+
+# postgres初起動時にinit.sqlとinsert_data.sqlを実行する方法
+
+docker compose up -d --build
+docker exec -it db /bin/bash
+psql -U user -d class_attendance -f init.sql
+psql -U user -d class_attendance -f insert_data.sql
+
+# を実行して反映させる
