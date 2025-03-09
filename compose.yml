@@ -3,17 +3,13 @@ services:
     build: ./db
     container_name: db
     restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: class_attendance
     networks:
       - app_network
 
   gps_tracker:
     build: ./src/gps_tracker
     container_name: gps_tracker
-    restart: always
+    # restart: always
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/class_attendance
     depends_on:
@@ -24,7 +20,7 @@ services:
   attendance_checker:
     build: ./src/attendance_checker
     container_name: attendance_checker
-    restart: always
+    # restart: always
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/class_attendance
     depends_on:
@@ -32,8 +28,7 @@ services:
     networks:
       - app_network
 
-volumes:
-  pg_data:
-
 networks:
   app_network:
+    driver: bridge
+    

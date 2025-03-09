@@ -23,5 +23,3 @@ CREATE TABLE attendance (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- データ挿入用の別ファイルを読み込む
--- \i /docker-entrypoint-initdb.d/insert_data.sql;
