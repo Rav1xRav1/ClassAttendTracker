@@ -3,8 +3,12 @@ services:
     build: ./db
     container_name: db
     restart: always
+    env_file:
+      - ./db/.env
     networks:
       - app_network
+    volumes:
+      - ./db/pg_data:/var/lib/postgresql/data
 
   gps_tracker:
     build: ./src/gps_tracker
