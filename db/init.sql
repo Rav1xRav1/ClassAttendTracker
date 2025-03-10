@@ -23,3 +23,23 @@ CREATE TABLE attendance (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 授業がない日を保存するテーブル
+CREATE TABLE holidays (
+    id SERIAL PRIMARY KEY,
+    start_date DATE NOT NULL, -- 休暇の開始日
+    end_date DATE NOT NULL, -- 休暇の終了日
+    start_period INT CHECK (start_period BETWEEN 1 AND 7), -- 休暇の開始コマ（オプション）
+    end_period INT CHECK (end_period BETWEEN 1 AND 7), -- 休暇の終了コマ（オプション）
+    description VARCHAR(255) -- 祝日や休暇の説明
+);
+
+-- 授業が振替になる日を保存するテーブル
+CREATE TABLE rescheduled_classes (
+    id SERIAL PRIMARY KEY,
+    original_date DATE NOT NULL, -- 元の授業日
+    new_date DATE NOT NULL, -- 振替後の授業日
+    original_period INT NOT NULL CHECK (original_period BETWEEN 1 AND 7), -- 元の授業コマ
+    new_period INT NOT NULL CHECK (new_period BETWEEN 1 AND 7), -- 振替後の授業コマ
+    schedule_id INT REFERENCES schedules(id) ON DELETE CASCADE -- 振替対象の授業
+);
+
