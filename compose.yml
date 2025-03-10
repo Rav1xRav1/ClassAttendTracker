@@ -16,10 +16,14 @@ services:
     # restart: always
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/class_attendance
-    depends_on:
-      - db
+    env_file:
+      - ./src/gps_tracker/.env
+    # depends_on:
+    #   - db
     networks:
       - app_network
+    volumes:
+      - /home/nishimuraippei/ClassAttendTracker/src/gps_tracker/.pyicloud:/app/.pyicloud
 
   attendance_checker:
     build: ./src/attendance_checker
