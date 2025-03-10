@@ -7,4 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./ .
 
-CMD ["python", "main.py"]
+# nanoをインストール
+RUN apt-get update && apt-get install -y nano
+
+# CMD ["python", "main.py"]
+CMD [ "bash", "-c", "[ -d .pyicloud ] || python get_2Auto.py && python main.py" ]
