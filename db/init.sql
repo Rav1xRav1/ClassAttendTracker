@@ -43,3 +43,11 @@ CREATE TABLE rescheduled_classes (
     schedule_id INT REFERENCES schedules(id) ON DELETE CASCADE -- 振替対象の授業
 );
 
+-- 授業の時間を管理するテーブル
+CREATE TABLE class_times (
+    id SERIAL PRIMARY KEY,
+    period INT NOT NULL CHECK (period BETWEEN 1 AND 7), -- 1限目から7限目まで
+    start_time TIME NOT NULL, -- 授業開始時間
+    end_time TIME NOT NULL -- 授業終了時間
+);
+
