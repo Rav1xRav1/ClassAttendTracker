@@ -54,7 +54,6 @@ CREATE TABLE class_times (
 -- 位置情報を保存するテーブル
 CREATE TABLE location_data (
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL, -- ユーザーID
     latitude DOUBLE PRECISION NOT NULL, -- 緯度
     longitude DOUBLE PRECISION NOT NULL, -- 経度
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 位置情報の取得時間
