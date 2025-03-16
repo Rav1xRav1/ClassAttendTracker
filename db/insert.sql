@@ -1,6 +1,6 @@
 -- 初期データを挿入
 -- 建物情報
-INSERT INTO locations (id, name, latitude, longitude) VALUES 
+INSERT INTO class_locations (id, name, latitude, longitude) VALUES 
 (1, 'タギタリウス館', 35.069752, 135.758382),
 (2, '真理館', 35.069401, 135.758543),
 (3, '天地館', 35.071381, 135.757953),
@@ -15,7 +15,8 @@ INSERT INTO locations (id, name, latitude, longitude) VALUES
 
 -- 授業スケジュール情報
 INSERT INTO schedules (weekday, period, location_id, class_name) VALUES 
-(3, 1, 6, 'プログラミング演習B');
+(3, 1, 6, 'プログラミング演習B'),
+(6, 4, 1, 'test');
 
 
 -- 授業がない日情報
