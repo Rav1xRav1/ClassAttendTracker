@@ -1,5 +1,5 @@
 -- 建物情報テーブル（授業の場所）
-CREATE TABLE locations (
+CREATE TABLE class_locations (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL, -- 建物名
     latitude DOUBLE PRECISION NOT NULL, -- 緯度
@@ -11,7 +11,7 @@ CREATE TABLE schedules (
     id SERIAL PRIMARY KEY,
     weekday INT NOT NULL CHECK (weekday BETWEEN 0 AND 6), -- 0:日曜, 1:月曜, ..., 6:土曜
     period INT NOT NULL CHECK (period BETWEEN 1 AND 7), -- 1限目から7限目まで
-    location_id INT REFERENCES locations(id) ON DELETE CASCADE, -- 授業が行われる建物
+    location_id INT REFERENCES class_locations(id) ON DELETE CASCADE, -- 授業が行われる建物
     class_name VARCHAR(255) NOT NULL -- 授業名
 );
 
@@ -28,9 +28,9 @@ CREATE TABLE holidays (
     id SERIAL PRIMARY KEY,
     start_date DATE NOT NULL, -- 休暇の開始日
     end_date DATE NOT NULL, -- 休暇の終了日
-    start_period INT CHECK (start_period BETWEEN 1 AND 7), -- 休暇の開始コマ（オプション）
-    end_period INT CHECK (end_period BETWEEN 1 AND 7), -- 休暇の終了コマ（オプション）
-    description VARCHAR(255) -- 祝日や休暇の説明
+    start_period INT CHECK (start_period BETWEEN 1 AND 7) DEFAULT NULL, -- 休暇の開始コマ（オプション）
+    end_period INT CHECK (end_period BETWEEN 1 AND 7) DEFAULT NULL, -- 休暇の終了コマ（オプション）
+    description VARCHAR(255) DEFAULT '' -- 祝日や休暇の説明
 );
 
 -- 授業が振替になる日を保存するテーブル
@@ -52,10 +52,9 @@ CREATE TABLE class_times (
 );
 
 -- 位置情報を保存するテーブル
-CREATE TABLE location_data (
+CREATE TABLE gps_locations (
     id SERIAL PRIMARY KEY,
     latitude DOUBLE PRECISION NOT NULL, -- 緯度
     longitude DOUBLE PRECISION NOT NULL, -- 経度
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 位置情報の取得時間
 );
-
