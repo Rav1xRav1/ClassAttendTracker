@@ -12,11 +12,15 @@ import logging
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    # ログの設定
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
+    
+    # 環境変数からユーザー名とパスワードを取得
     user_name = os.environ.get('USER_NAME')
     password = os.environ.get('PASSWORD')
 
+    # PyiCloudServiceのインスタンスを作成
     api = PyiCloudService(user_name, password, cookie_directory="./.pyicloud", verify=True)
 
     # 2要素認証または2段階認証が必要かどうかを確認
@@ -92,6 +96,7 @@ def main():
     # for i, device in enumerate(api.devices):
     #     print(f"{i + 1}. {device}")
 
+    # データベース接続のインスタンスを作成
     psql = PSQL(os.getenv('DATABASE_URL'))
 
     today = datetime.datetime.min
@@ -140,6 +145,7 @@ def main():
         else:
             pass
 
+        # iPhoneの位置情報を取得
         lat_lon = api.iphone.location()
         if lat_lon is None:
             logger.error("Failed to get location.")
@@ -147,11 +153,14 @@ def main():
 
         logger.info(lat_lon)
 
+        # 位置情報をデータベースに挿入
         psql.gps_locations.insert(lat_lon['latitude'], lat_lon['longitude'])
 
+        # データベースからすべての位置情報を取得して表示
         print(psql.gps_locations.fetch_all())
 
-        break
+        # 1分間スリープ
+        sleep(60)
 
 if __name__ == '__main__':
     main()
