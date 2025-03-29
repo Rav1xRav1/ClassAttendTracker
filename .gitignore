@@ -1,9 +1,10 @@
 db/pg_data/
 
 src/attendance/.env
+src/attendance/.venv/
 
 src/gps_tracker/.pyicloud
-src/gps_tracker/.venv
+src/gps_tracker/.venv/
 src/gps_tracker/.2fa_code
 src/gps_tracker/.dockerignore
 src/gps_tracker/.env
