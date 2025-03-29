@@ -1,7 +1,7 @@
 db/pg_data/
 
-src/attendance/.env
-src/attendance/.venv/
+src/attendance_checker/.env
+src/attendance_checker/.venv/
 
 src/gps_tracker/.pyicloud
 src/gps_tracker/.venv/
