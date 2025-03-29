@@ -19,8 +19,6 @@ services:
     build: ./src/gps_tracker
     container_name: gps_tracker
     # restart: always
-    environment:
-      DATABASE_URL: postgresql://user:password@db:5432/class_attendance
     env_file:
       - ./src/gps_tracker/.env
     # depends_on:
