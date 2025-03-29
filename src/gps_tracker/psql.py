@@ -37,6 +37,14 @@ class HOLIDAYS:
 class SCHEDULES:
     def __init__(self, cursor):
         self.cursor = cursor
+    
+    # 全ての情報を返す
+    def fetch_all(self):
+        query = """
+        SELECT * FROM schedules
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
     # 現在時刻から現在何限目かを取得する関数
     def get_current_period(self, today_time):
@@ -64,21 +72,33 @@ class SCHEDULES:
         day_of_week = today.weekday()  # 月曜日が0、日曜日が6
         self.cursor.execute(query, (day_of_week, current_period))
         return self.cursor.fetchone()
+
+# class_timesテーブルのクラス
+class CLASS_TIMES:
+    def __init__(self, cursor):
+        self.cursor = cursor
     
-    # 現在の時限数から授業開始までの秒数を取得する関数
-    def seconds_until_class_start(self, today_time):
-        current_period = self.get_current_period(today_time)
-        if current_period is None:
-            return None
-        
+    # 全ての情報を返す
+    def fetch_all(self):
+        query = """
+        SELECT * FROM class_times
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+    
+    # 現在の時間以降で最も近い授業の時間を取得して現在時刻から何秒か返す
+    def seconds_until_class_start(self, today):
         query = """
         SELECT start_time FROM class_times
-        WHERE period = %s
+        WHERE start_time >= %s
+        ORDER BY start_time ASC
+        LIMIT 1
         """
-        self.cursor.execute(query, (current_period,))
-        start_time = self.cursor.fetchone()[0]
-        start_datetime = datetime.combine(datetime.today(), start_time)
-        return (start_datetime - datetime.today()).total_seconds()
+        self.cursor.execute(query, (today,))
+        result = self.cursor.fetchone()
+        if result:
+            return (datetime.combine(datetime.today(), result[0]) - datetime.now()).total_seconds()
+        return None
 
 # 取得した位置情報を保存するテーブルを操作する
 class GPS_LOCATIONS:
@@ -116,6 +136,7 @@ class PSQL:
         self.holidays = HOLIDAYS(self.cursor)
         self.schedules = SCHEDULES(self.cursor)
         self.gps_locations = GPS_LOCATIONS(self.cursor, self.conn)  # connを渡す
+        self.class_times = CLASS_TIMES(self.cursor)
 
     def close(self):
         self.cursor.close()
