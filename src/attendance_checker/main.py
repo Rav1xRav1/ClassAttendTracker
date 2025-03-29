@@ -1,22 +1,23 @@
 import psycopg2
 import os
 
-# 環境変数からデータベース接続情報を取得
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@db:5432/class_attendance')
+from psql import PSQL
 
-def get_db_connection():
-    # PostgreSQL に接続
+from datetime import datetime
+
+
+# メイン関数
+def main():
+    # 環境変数からデータベース接続情報を取得
+    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@db:5432/class_attendance')
+
+    # データベース接続を取得
     while True:
         try:
             conn = psycopg2.connect(DATABASE_URL)
             break
         except psycopg2.OperationalError:
             print('Retrying connection...')
-    return conn
-
-def fetch_locations():
-    # データベース接続を取得
-    conn = get_db_connection()
     cursor = conn.cursor()
 
     # print("TEST :",cursor)
@@ -41,6 +42,15 @@ def fetch_locations():
     cursor.close()
     conn.close()
 
-# メイン関数
+    # 本日の曜日を1~6で取得
+    today_weekday = datetime.now().weekday() + 1
+
+    # 授業の中心座標と円の半径を取得
+    # データベース接続のインスタンスを作成
+    psql = PSQL(os.getenv('DATABASE_URL'))
+    # 本日の授業のリストを取得
+    today_class = psql.class_locations.get_class_location(today_weekday)
+
+
 if __name__ == '__main__':
-    fetch_locations()
+    main()
