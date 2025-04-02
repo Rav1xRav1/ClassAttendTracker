@@ -9,6 +9,7 @@ CREATE TABLE class_locations (
 -- 授業スケジュールテーブル
 CREATE TABLE schedules (
     id SERIAL PRIMARY KEY,
+    semester INT NOT NULL CHECK (semester BETWEEN 1 AND 8), -- 何セメスターか
     weekday INT NOT NULL CHECK (weekday BETWEEN 0 AND 6), -- 0:日曜, 1:月曜, ..., 6:土曜
     period INT NOT NULL CHECK (period BETWEEN 1 AND 7), -- 1限目から7限目まで
     location_id INT REFERENCES class_locations(id) ON DELETE CASCADE, -- 授業が行われる建物
@@ -57,4 +58,12 @@ CREATE TABLE gps_locations (
     latitude DOUBLE PRECISION NOT NULL, -- 緯度
     longitude DOUBLE PRECISION NOT NULL, -- 経度
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 位置情報の取得時間
+);
+
+-- どの期間が何セメスタか管理するテーブル
+CREATE TABLE semester (
+    id SERIAL PRIMARY KEY,
+    semester INT NOT NULL CHECK (semester BETWEEN 1 AND 8), -- 何セメスターか
+    start_date DATE NOT NULL, -- セメスターの開始日
+    end_date DATE NOT NULL -- セメスターの終了日
 );
