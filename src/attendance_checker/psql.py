@@ -15,13 +15,21 @@ class CLASS_LOCATIONS:
         self.cursor.execute(query)
         return self.cursor.fetchall()
     
-    def get_coordinates(self, location_id):
+    def get_class_location(self, location_id):
         query = """
-        SELECT latitude, longitude FROM locations WHERE id = %s
+        SELECT latitude, longitude FROM class_locations WHERE id = %s
         """
         self.cursor.execute(query, (location_id,))
         result = self.cursor.fetchone()
         return result if result else None
+    
+    # 引数に与えられた曜日の授業を返す関数
+    def get_class_by_weekday(self, weekday):
+        query = """
+        SELECT * FROM schedules WHERE weekday = %s
+        """
+        self.cursor.execute(query, (weekday,))
+        return self.cursor.fetchall()
 
 
 class SCHEDULES:
