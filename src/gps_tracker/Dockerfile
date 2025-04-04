@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./ .
 
 # nanoをインストール
-RUN apt-get update && apt-get install -y nano
+# RUN apt-get update && apt-get install -y nano
 
 CMD ["python", "main.py"]
 # CMD [ "bash", "-c", "python get_2Auto.py && python main.py" ]

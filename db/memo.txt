@@ -4,6 +4,12 @@
 docker compose up -d --build
 docker exec -it db /bin/bash
 psql -U user -d class_attendance -f init.sql
-psql -U user -d class_attendance -f insert_data.sql
+psql -U user -d class_attendance -f insert.sql
 
 # を実行して反映させる
+
+# テーブル表示
+\dt;
+
+# sqlにはいる方法
+psql -h localhost -U user -d class_attendance
