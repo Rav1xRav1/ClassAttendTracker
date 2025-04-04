@@ -33,12 +33,9 @@ INSERT INTO schedules (semester, weekday, period, location_id, class_name) VALUE
 
 
 -- 授業がない日情報
-INSERT INTO holidays (start_date, end_date, description) VALUES 
-('2021-08-13', '2021-08-15', '夏季休暇'),
-('2021-09-18', '2021-09-19', '教職員研修'),
-('2025-03-01', '2025-03-02', '秋季休暇'),
+INSERT INTO holidays (start_date, end_date, description) VALUES
 ('2025-04-01', '2025-04-07', '春季休暇'),
-('2025-07-17', '')
+('2025-07-17', '2025-09-27', '夏季休暇');
 
 
 -- 授業の時間情報
