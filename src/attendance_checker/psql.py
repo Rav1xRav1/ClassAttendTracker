@@ -10,7 +10,7 @@ class CLASS_LOCATIONS:
     # 全ての情報を返す
     def fetch_all(self):
         query = """
-        SELECT * FROM locations
+        SELECT * FROM class_locations
         """
         self.cursor.execute(query)
         return self.cursor.fetchall()
@@ -22,19 +22,19 @@ class CLASS_LOCATIONS:
         self.cursor.execute(query, (location_id,))
         result = self.cursor.fetchone()
         return result if result else None
-    
-    # 引数に与えられた曜日の授業を返す関数
-    def get_class_by_weekday(self, weekday):
-        query = """
-        SELECT * FROM schedules WHERE weekday = %s
-        """
-        self.cursor.execute(query, (weekday,))
-        return self.cursor.fetchall()
 
 
 class SCHEDULES:
     def __init__(self, cursor):
         self.cursor = cursor
+
+    # 全ての内容を返す関数
+    def fetch_all(self):
+        query = """
+        SELECT * FROM schedules
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
     #  引数の曜日の授業を取得する関数
     def get_classes_by_weekday(self, weekday):
@@ -43,6 +43,41 @@ class SCHEDULES:
         """
         self.cursor.execute(query, (weekday,))
         return self.cursor.fetchall()
+
+
+class GPS_LOCATIONS:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    # 全ての情報を返す
+    def fetch_all(self):
+        query = """
+        SELECT * FROM gps_locations
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+    # 引数に指定された時間帯の位置情報を返す関数
+    def get_location_by_time(self, start_time, end_time):
+        query = """
+        SELECT * FROM gps_locations WHERE timestamp BETWEEN %s AND %s
+        """
+        self.cursor.execute(query, (start_time, end_time))
+        return self.cursor.fetchall()
+    
+
+class CLASS_TIMES:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    # periodを受け取って授業の時間帯を取得する関数
+    def get_class_time(self, period):
+        query = """
+        SELECT start_time, end_time FROM class_times WHERE period = %s
+        """
+        self.cursor.execute(query, (period,))
+        result = self.cursor.fetchone()
+        return result if result else None
 
 
 class PSQL:
@@ -57,6 +92,8 @@ class PSQL:
         
         self.class_locations = CLASS_LOCATIONS(self.cursor)
         self.schedules = SCHEDULES(self.cursor)
+        self.gps_locations = GPS_LOCATIONS(self.cursor)
+        self.class_times = CLASS_TIMES(self.cursor)
 
     def close(self):
         self.cursor.close()
