@@ -80,6 +80,18 @@ class CLASS_TIMES:
         return result if result else None
 
 
+class ATTENDANCE:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    # 出席情報を挿入する関数
+    def insert_attendance(self, schedule_id, status, timestamp):
+        query = """
+        INSERT INTO attendance (schedule_id, status, timestamp) VALUES (%s, %s, %s)
+        """
+        self.cursor.execute(query, (schedule_id, status, timestamp))
+
+
 class PSQL:
     def __init__(self, DATABASE_URL, *tables):
         while True:
@@ -94,6 +106,7 @@ class PSQL:
         self.schedules = SCHEDULES(self.cursor)
         self.gps_locations = GPS_LOCATIONS(self.cursor)
         self.class_times = CLASS_TIMES(self.cursor)
+        self.attendance = ATTENDANCE(self.cursor)
 
     def close(self):
         self.cursor.close()
