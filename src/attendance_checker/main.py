@@ -1,56 +1,85 @@
+from geopy.distance import geodesic
 import psycopg2
 import os
-
 from psql import PSQL
+from datetime import datetime, timedelta
+from time import sleep
+import logging
 
-from datetime import datetime
-
+# ログ設定
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("attendance_checker.log"),
+        logging.StreamHandler()
+    ]
+)
 
 # メイン関数
 def main():
-    # 環境変数からデータベース接続情報を取得
-    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@db:5432/class_attendance')
-
-    # データベース接続を取得
     while True:
-        try:
-            conn = psycopg2.connect(DATABASE_URL)
-            break
-        except psycopg2.OperationalError:
-            print('Retrying connection...')
-    cursor = conn.cursor()
+        # 本日の曜日を1~6で取得 (月曜日=1, 日曜日=7)
+        today_weekday = datetime.now().weekday() + 1
+        logging.info(f"本日の曜日: {today_weekday}")
 
-    # print("TEST :",cursor)
+        # データベース接続のインスタンスを作成
+        psql = PSQL(os.getenv('DATABASE_URL'))
+        logging.info("データベース接続を確立しました")
 
-    # テーブル一覧を取得
-    cursor.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
+        # 本日の曜日に基づいて授業スケジュールを取得
+        today_class = psql.schedules.get_classes_by_weekday(today_weekday)
+        logging.info(f"本日の授業数: {len(today_class)}")
 
-    # 結果を表示
-    tables = cursor.fetchall()
-    for table in tables:
-        print(table[0])
-    
-    # locations テーブルからデータを取得
-    cursor.execute('SELECT id, name, latitude, longitude FROM locations')
-    locations = cursor.fetchall()
-    
-    # データを表示
-    for location in locations:
-        print(f'Location ID: {location[0]}, Name: {location[1]}, Latitude: {location[2]}, Longitude: {location[3]}')
-    
-    # クローズ
-    cursor.close()
-    conn.close()
+        # 本日の授業リストからそれぞれの授業の教室座標を取得
+        for class_location in today_class:
+            # 授業の情報を取得
+            id_ = class_location[0]
+            semester = class_location[1]
+            weekday = class_location[2]
+            period = class_location[3]
+            location_id = class_location[4]
+            class_name = class_location[5]
+            logging.info(f"授業情報: ID={id_}, Name={class_name}, Period={period}")
 
-    # 本日の曜日を1~6で取得
-    today_weekday = datetime.now().weekday() + 1
+            # 教室の座標を取得 (緯度と経度)
+            latitude, longitude = psql.class_locations.get_class_location(location_id)
+            logging.info(f"教室座標: Latitude={latitude}, Longitude={longitude}")
 
-    # 授業の中心座標と円の半径を取得
-    # データベース接続のインスタンスを作成
-    psql = PSQL(os.getenv('DATABASE_URL'))
-    # 本日の授業のリストを取得
-    today_class = psql.class_locations.get_class_location(today_weekday)
+            # 授業の時間帯を取得 (開始時間と終了時間)
+            start_time, end_time = psql.class_times.get_class_times_by_period(period)
+            logging.info(f"授業時間帯: Start={start_time}, End={end_time}")
+
+            # 授業時間帯に記録されたGPS座標を取得
+            coordinate_lst = psql.gps_locations.get_location_by_time(start_time, end_time)
+            logging.info(f"取得したGPS座標数: {len(coordinate_lst)}")
+
+            # 授業中に範囲内にいるかどうかを確認
+            is_within_area = []
+            for coordinate in coordinate_lst:
+                gps_latitude = coordinate[1]
+                gps_longitude = coordinate[2]
+
+                # 教室の座標との距離を計算し、範囲内かどうかを判定 (50メートル以内)
+                if 50 > geodesic((latitude, longitude), (gps_latitude, gps_longitude)).meters:
+                    is_within_area.append(True)
+                else:
+                    is_within_area.append(False)
+
+            # 授業中の位置情報が6割以上範囲内なら出席、それ以外は欠席とする
+            if len(is_within_area) > 0 and (is_within_area.count(True) / len(is_within_area)) > 0.6:
+                psql.attendance.insert_attendance(id_, 'present', start_time)
+                logging.info(f"出席登録: ID={id_}, Status=present")
+            else:
+                psql.attendance.insert_attendance(id_, 'absent', start_time)
+                logging.info(f"欠席登録: ID={id_}, Status=absent")
+
+            # 明日の19時までスリープする
+            sleep_time = (datetime.now().replace(hour=19, minute=0, second=0, microsecond=0) + timedelta(days=1) - datetime.now()).total_seconds()
+            logging.info(f"スリープ時間: {sleep_time}秒")
+            for _ in range(86400): sleep(sleep_time / 86400)
 
 
 if __name__ == '__main__':
+    logging.info("プログラムを開始します")
     main()
